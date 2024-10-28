@@ -1,0 +1,24 @@
+resources:
+  repositories:
+  - repository: self
+    type: git
+trigger:
+  branches:
+    include:
+    - refs/heads/release
+    - refs/heads/collaboration
+    - refs/heads/main
+variables:
+  - ${{if eq(variables['Build.SourceBranch'], 'refs/heads/release')}}:
+    - template: templates/releaseEnvironmentVars.yml
+  - ${{else}}:
+    - template: templates/environmentVars.yml
+stages:
+    - template: templates/web-angular-template-ci.yml
+      parameters:
+        agentPool: $(agentPool)
+    - ${{ each env in split(variables.envList, ',')}}:
+      - template: templates/web-angular-template-cd.yml
+        parameters:
+          deployEnvironment: ${{ env }}
+          agentPool: $(agentPool)

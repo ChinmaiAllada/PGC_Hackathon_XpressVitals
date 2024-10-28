@@ -1,0 +1,11 @@
+#Please add the variables for "web" component as "ui_<variable name>"
+variables:
+  serviceConnection: admintechbot
+  ui_AppName: web-st-dev-wus2
+  ui_appType: APP on Windows
+  ui_area: 'Administrative Technology\Service Engineering'
+  instrumentationKey: 494e8977-b79a-4d62-832f-f0c7050112af
+  clientId: 2de3de4e-516a-4664-b3e0-13316a3aebb1
+  scopeUri: api://2de3de4e-516a-4664-b3e0-13316a3aebb1/API
+  apiBaseUrl: https://api-st-dev-wus2.azurewebsites.net
+  MailTo:  #Deployment notification

@@ -1,0 +1,161 @@
+parameters:
+  - name: deployEnvironment
+  - name: agentPool
+stages:
+  - stage: AppService_${{parameters.deployEnvironment}}_CD
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    displayName: Deploy to ${{parameters.deployEnvironment}}
+    variables:
+      - template: vars.${{parameters.deployEnvironment}}.yml
+      - group: CAP_Sendemail
+    pool: ${{parameters.agentPool}}
+    jobs:
+      - deployment: DeployUICode
+        displayName: UI Deployment
+        workspace:
+          clean: all
+        continueOnError: true
+        environment: ${{parameters.deployEnvironment}}
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: Current
+                  artifact: drop
+                - task: replacetokens@3
+                  displayName: "Replace Tokens in Secrets & Specs"
+                  inputs:
+                    targetFiles: '$(Pipeline.Workspace)\drop\**\*.json'
+                    encoding: 'auto'
+                    writeBOM: true
+                    actionOnMissing: 'warn'
+                    keepToken: false
+                    tokenPrefix: '#{{'
+                    tokenSuffix: '}}#'
+                    useLegacyPattern: false
+                    enableTelemetry: true
+                - task: AzureWebApp@1
+                  inputs:
+                    azureSubscription: ${{variables.serviceConnection}}
+                    appType: ${{variables.ui_appType}}
+                    appName: ${{variables.ui_AppName}}
+                    package: '$(Pipeline.Workspace)\drop'
+      - job: CheckDeployEnvironment
+        dependsOn: DeployUICode
+        condition: and(succeeded('DeployUICode'), or(contains('${{parameters.deployEnvironment}}', 'prod'), contains('${{parameters.deployEnvironment}}', 'prd')))
+        steps:
+          - powershell: |
+              try {
+                az config set extension.use_dynamic_install=yes_without_prompt
+                write-host $env:AZURE_DEVOPS_EXT_PAT
+                $env:AZURE_DEVOPS_EXT_PAT = '$(System.AccessToken)'
+                $org = "https://dev.azure.com/PSJH"
+                $env:AZURE_DEVOPS_EXT_PAT | az devops login
+                az boards work-item create --title "Creating Work Item for tracking Deployment to $(Build.Repository.Name)" --type "task" --area "${{variables.ui_area}}" --description "Task to track deployment" --org "https://dev.azure.com/PSJH" --project "${{variables.project}}" --reason "New"
+              } catch {
+                if ($_.Exception.Message -like '*AreaPath*') {
+                    Write-Host "Error: There is an issue with the area path. Please check Valid area path provided."
+                } else {
+                    throw $_
+                }
+              }
+            name: Creating_Task
+          - powershell: |
+              az config set extension.use_dynamic_install=yes_without_prompt
+              write-host $env:AZURE_DEVOPS_EXT_PAT
+              $env:AZURE_DEVOPS_EXT_PAT = '$(System.AccessToken)'
+              $org = "https://dev.azure.com/PSJH"
+              $env:AZURE_DEVOPS_EXT_PAT | az devops login
+              $newjson = az boards work-item create --title "Pull request from release to main for $(Build.DefinitionName) with  $(Build.BuildNumber)" --type "User Story" --area "${{variables.ui_area}}" --description "Pull request from release to main" --org "https://dev.azure.com/PSJH" --project "${{variables.project}}" --reason "New" | ConvertFrom-Json
+              $workid = $newjson.id
+              write-host "Generating work id is $workid"
+              az repos pr create --auto-complete true --org $org --project "${{variables.project}}" --repository "$(Build.Repository.Name)" --source-branch "release" --target-branch "main" --title "Automatic PR from release to main" --work-items $workid --reviewers "${{variables.prReviewer}}"
+            name: Creating_PR
+          - task: PowerShell@2
+            condition: and(succeeded(), not(canceled()))
+            name: RetainOnSuccess
+            displayName: Retain on Success
+            inputs:
+              failOnStderr: true
+              targetType: 'inline'
+              script: |
+                $contentType = "application/json";
+                $headers = @{ Authorization = 'Bearer $(System.AccessToken)' };
+                $rawRequest = @{ daysValid = 365 * 3; definitionId = $(System.DefinitionId); ownerId = 'User:$(Build.RequestedForId)'; protectPipeline = $false; runId = $(Build.BuildId) };
+                $request = ConvertTo-Json @($rawRequest);
+                $uri = "$(System.CollectionUri)$(System.TeamProject)/_apis/build/retention/leases?api-version=6.0-preview.1";
+                Invoke-RestMethod -uri $uri -method POST -Headers $headers -ContentType $contentType -Body $request;
+          - task: PowerShell@2
+            displayName: 'Send Deployment Notification Email'
+            condition: and(succeeded(), not(canceled()))
+            inputs:
+              targetType: 'inline'
+              script: |
+                $MailTo = "${{variables.MailTo}}"
+                $MailFrom = "$(MailFrom)"
+                $Smtpserver = "$(Smtpserver)"
+                $SmtpUser = "$(SmtpUser)"
+                $SmtpPassword = "$(smtpPassword)"
+                $deploymentstatus = "Success"
+                $BuildId = "$(Build.BuildId)"
+                $DefinitionName = "$(Build.DefinitionName)"
+                $stagename = "${{parameters.deployEnvironment}}"
+                $To = @($MailTo)
+                $From = $MailFrom
+                $Server = $Smtpserver
+                # Initiate SMTP credential to send email
+                $SmtpCredential = New-Object -TypeName System.Management.Automation.PSCredential -ArgumentList $SmtpUser, $($SmtpPassword | ConvertTo-SecureString -AsPlainText -Force)
+                # Release Link
+                $Releaselink = "https://dev.azure.com.mcas.ms/PSJH/Administrative%20Technology/_build/results?buildId=" + "$BuildId" + "&view=results"
+                function SendMail {
+                    param(
+                        [Parameter(Mandatory = $true)][string[]]$To,
+                        [Parameter(Mandatory = $true)][string]$From,
+                        [Parameter(Mandatory = $true)][string]$SmtpServer,
+                        [Parameter(Mandatory = $true)][int]$Port = 25,
+                        [Parameter(Mandatory = $true)][pscredential]$SmtpCredential,
+                        [Parameter(Mandatory = $true)][string]$Subject,
+                        [Parameter(Mandatory = $true)][string]$Body,
+                        [Parameter(Mandatory = $false)][System.Net.Mail.Attachment[]]$attachment,
+                        [Parameter(Mandatory = $false)][switch]$IsBodyHTML
+                    )
+                    [System.Net.Mail.MailMessage]$Mail = new-object System.Net.Mail.MailMessage
+                    $To | % { $Mail.To.Add($_) }
+                    $Mail.From = $From
+                    $Mail.IsBodyHtml = $IsBodyHTML
+                    $Mail.Body = $Body
+                    $Mail.Subject = $Subject
+                    [System.Net.Mail.SmtpClient]$SMTP = new-object System.Net.Mail.SmtpClient
+                    $SMTP.Host = $SmtpServer
+                    $SMTP.Port = $Port
+                    If ($SmtpCredential) {
+                        $NetCredential = New-Object System.Net.NetworkCredential
+                        $NetCredential.UserName = $SmtpCredential.GetNetworkCredential().UserName
+                        $NetCredential.Password = $SmtpCredential.GetNetworkCredential().Password
+                        $SMTP.Credentials = $NetCredential
+                    }
+                    try {
+                        $SMTP.Send($Mail)   
+                    } catch {
+                        $_ | select *
+                    }
+                } 
+                # Send Notification Mail about Deployment Status
+                Write-Host "Deployment $deploymentstatus in $stagename environment - $DefinitionName"
+                $css = "<style>table {
+                  border-collapse: collapse;
+                  border-spacing: 0;
+                  width: 100%;
+                  border: 1px solid #ddd;
+                }
+                th, td {
+                  text-align: left;
+                  padding: 16px;
+                }
+                </style>"
+                $MailSubject = "Deployment Status success in $DefinitionName"
+                $Body = "<br><br><table><tr bgcolor=#DCDCDC><th><br></th></tr><tr><td><body style=\"font-size:1.5em\">Hello!<br><br>Deployment <b style=\"color:limegreen\">$deploymentstatus</b> in $stagename environment for $DefinitionName. <br>Please <a href=\"$Releaselink\">click here</a> for more details. <br><br>Thanks,<br>CAP Team<br><br></body></td></tr><tr bgcolor=#DCDCDC><td><p style=\"font-size:0.75em\">*This is an automatic email generated by unmonitored alias. Please do not reply to this email.</p></td></tr></table>"
+                $html = $css + $Body
+                # Call function of SendMail
+                SendMail -to $To -From $From -Subject $MailSubject -Body $html -SmtpServer $Server -port 25 -SmtpCredential $SmtpCredential -IsBodyHTML
+                Write-Host "Sent Mail regarding the deployment status"
