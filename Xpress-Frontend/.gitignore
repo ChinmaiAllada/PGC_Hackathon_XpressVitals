@@ -1,0 +1,42 @@
+####Visual Studio files
+/.vs
+*.suo
+*.user
+*.sln.docstates
+/Src/.Angular
+
+#########Build results
+[Dd]ebug/
+x64/
+x86/
+[Oo]bj/
+
+######MSTest test Results
+[Tt]est[Rr]esult*/
+[Bb]uild[Ll]og.*
+
+#########Node.js dependencies
+node_modules/
+#######Angular generated files
+/dist/
+/tmp/
+/.ngfactory.ts
+/.ngstyle.ts
+$ngcc/
+###########IDE files
+.idea/
+.vscode/
+
+#####Log files
+*.log
+########Environment variables
+.env
+.env.prod
+.env.local
+####System files
+Thumbs.db
+.DS_Store
+#####Editor specific files
+*.swp
+*.swo
+

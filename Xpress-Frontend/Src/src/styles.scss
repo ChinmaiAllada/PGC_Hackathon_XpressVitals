@@ -1,0 +1,78 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+body {
+	font-family: Barlow;
+	height: 100vh;
+	margin: 0;
+	padding: 0;
+
+	.app {
+		position: relative;
+
+		.app__header {
+			box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+			//			position: fixed;
+			display: inline-flex;
+			flex-direction: row;
+			align-items: center;
+			padding: 12px;
+			width: 100%;
+			z-index: 1;
+
+			.title {
+				color: #6c6c6c;
+				font-size: 25px;
+				font-family: Barlow;
+				font-weight: 500;
+				margin-left: 44px;
+			}
+
+			.avatarLayout {
+				margin-left: auto;
+
+				.avatar {
+					border-radius: 40px;
+					max-height: 40px;
+					max-width: 40px;
+				}
+			}
+		}
+
+		.app__body {
+
+
+			.app__wrapper {
+				overflow: auto;
+				margin-left: 20px;
+				margin-right: 20px;
+				margin-top: 15px;
+				transition: all 300ms ease-in-out;
+
+				.app__content {
+					transition: all 300ms ease-in-out;
+				}
+
+				.app_content_padding {
+					padding-left: 30px;
+					padding-right: 30px;
+				}
+			}
+		}
+
+	
+	}
+}
+
+.app_header_text {
+	font-size: 20px;
+	font-family: Barlow;
+	font-weight: 500;
+	text-transform: uppercase;
+	letter-spacing: 2px;
+	word-wrap: break-word;
+	padding-top: 20px;
+	padding-bottom: 20px;
+}
+

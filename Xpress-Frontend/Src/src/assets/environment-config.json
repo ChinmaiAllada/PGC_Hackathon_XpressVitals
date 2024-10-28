@@ -1,0 +1,8 @@
+{
+  "apiUrls": {
+    "apiBaseUrl": "#{{apiBaseUrl}}#",
+    "apiVersion": {
+      "v1": "api/v1"
+    }
+  }
+}

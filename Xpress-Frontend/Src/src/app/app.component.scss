@@ -1,0 +1,24 @@
+::ng-deep .mat-mdc-checkbox.mat-accent {
+  --mdc-checkbox-selected-icon-color: #00338e;
+  --mdc-checkbox-selected-hover-icon-color: #00338e;
+  --mdc-checkbox-selected-pressed-icon-color: #00338e;
+  --mdc-checkbox-selected-focus-icon-color: #00338e !important;
+  --mdc-circular-progress-active-indicator-color: #00338e !important;
+  --mdc-checkbox-selected-focus-state-layer-color: #00338e !important;
+  --mdc-checkbox-selected-hover-state-layer-color: #00338e !important;
+  --mdc-checkbox-selected-pressed-state-layer-color: #00338e !important;
+}
+::ng-deep .mat-pseudo-checkbox {
+  visibility: hidden !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+::ng-deep .mat-mdc-option .mat-pseudo-checkbox-minimal {
+  margin-left: 0 !important;
+}
+::ng-deep .mdc-checkbox .mdc-checkbox__native-control:enabled:checked ~ .mdc-checkbox__background {
+  background-color: #00338e !important ;
+}
+::ng-deep .mdc-checkbox .mdc-checkbox__native-control:enabled ~ .mdc-checkbox__background .mdc-checkbox__checkmark {
+  color: white !important;
+}

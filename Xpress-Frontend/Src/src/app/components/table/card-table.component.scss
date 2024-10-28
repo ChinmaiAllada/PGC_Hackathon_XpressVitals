@@ -1,0 +1,156 @@
+
+// .card-table {
+//   display: flex;
+//   flex-direction: column;
+//   gap: 16px;
+//   padding: 16px;
+// }
+
+// /* Header Row Styling */
+// .card-header-row {
+//   display: flex;
+//   background-color: #e0e0e0;
+//   padding: 12px;
+//   border-radius: 8px;
+//   font-weight: bold;
+// }
+
+// .card-header {
+//   flex: 1;
+//   padding: 0 10px;
+//   text-align: center;
+// }
+
+// /* Data Row Styling */
+// .card-row {
+//   display: flex;
+//   align-items: center;
+//   justify-content: space-between;
+//   background-color: #f9f9f9;
+//   padding: 12px;
+//   border: 1px solid #ccc;
+//   border-radius: 8px;
+// }
+
+// .card-detail {
+//   flex: 1;
+//   padding: 0 10px;
+//   text-align: center;
+// }
+
+// .card-indicator {
+//   width: 20px;
+//   height: 20px;
+//   border-radius: 50%;
+//   margin-left: 10px;
+//   display: inline-block;
+// }
+
+// /* Button Styling */
+// .sms-button {
+//   position: fixed;
+//   bottom: 20px;
+//   right: 20px;
+//   background-color: #00338E;
+//   color: white;
+//   padding: 12px 24px;
+//   border: none;
+//   border-radius: 5px;
+//   cursor: pointer;
+//   font-size: 16px;
+// }
+
+// .sms-button:hover {
+//   background-color: #0645b3;
+// }
+
+
+.card-table {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  margin-bottom: 20px; 
+}
+
+/* Header Row Styling */
+.card-header-row {
+  display: flex;
+  background-color: #e0e0e0;
+  padding: 12px;
+  border-radius: 8px;
+  font-weight: bold;
+}
+
+.card-header {
+  flex: 1;
+  padding: 0 10px;
+  text-align: center;
+}
+
+/* Data Row Styling */
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #f9f9f9;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+
+.card-detail {
+  flex: 1;
+  padding: 0 10px;
+  text-align: center;
+}
+
+.card-indicator {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  margin-left: 10px;
+  display: inline-block;
+}
+
+/* Dragging Styling */
+.cdk-drag-preview {
+  border: 1px solid #007bff;
+  box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.cdk-drag-placeholder {
+  opacity: 0.3;
+}
+
+/* Button Styling */
+.button-container {
+  position: fixed; /* Fixes the position of the buttons */
+  bottom: 20px; /* Distance from the bottom of the page */
+  right: 20px; /* Distance from the right side of the page */
+  display: flex; /* Arrange buttons in a row */
+  gap: 10px; /* Space between buttons */
+}
+button {
+  padding: 12px 24px;
+  background-color: #00338e; /* Default color for other buttons */
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+button:hover {
+  background-color: #0242b1; /* Hover effect for other buttons */
+}
+
+/* Specific style for the Print button */
+.print-button {
+  background-color: #008000; /* Green color */
+}
+
+.print-button:hover {
+  background-color: #029b02; /* Darker green on hover */
+}

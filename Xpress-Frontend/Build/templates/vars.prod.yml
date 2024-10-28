@@ -1,0 +1,13 @@
+variables:
+  project: Administrative Technology
+  ui_AppName: web-st-dev-wus2
+  serviceConnection: admintechbot
+  ui_area: Administrative Technology\Service Engineering
+  instrumentationKey: 494e8977-b79a-4d62-832f-f0c7050112af
+  apiBaseUrl: https://api-st-dev-wus2.azurewebsites.net
+  MailTo: 
+  ui_appType: APP on Windows
+  clientId: 2de3de4e-516a-4664-b3e0-13316a3aebb1
+  prReviewer: shashankreddy.narayana@providence.org
+  scopeUri: api://2de3de4e-516a-4664-b3e0-13316a3aebb1/API
+

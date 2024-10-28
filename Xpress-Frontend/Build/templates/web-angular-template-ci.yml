@@ -1,0 +1,60 @@
+parameters:
+  - name: agentPool
+stages:
+  - stage: Angular_Build_CI
+    displayName: Angular build CI
+    pool:
+      name: ${{ parameters.agentPool }}
+    variables:
+      - name: scanbranch
+        value: $(Build.SourceBranchName)
+    jobs:
+      - job: Angular_CI
+        displayName: Build Angular Application
+        steps:
+          - checkout: self
+          - task: Checkmarx AST@2
+            displayName: 'Checkmarx AST'
+            inputs:
+              CheckmarxService: 'CxOne_Checkmarx_sast'
+              tenantName: providence
+              projectName: $(Build.Repository.Name)
+              branchName: $(scanbranch)
+              additionalParams: '--project-groups Admin_Tech --scan-types sast,sca'
+          - task: SonarQubePrepare@5
+            displayName: 'Prepare analysis on SonarQube'
+            inputs:
+              SonarQube: SonarQube
+              scannerMode: CLI
+              configMode: manual
+              cliProjectKey: '$(Build.Repository.Name)'
+              cliProjectName: '$(Build.Repository.Name)'
+              cliSources: 'Src'
+              condition: or(succeeded(), eq(variables['Build.Reason'], 'PullRequest'),eq(variables['Build.SourceBranch'], 'refs/heads/collaboration'))
+          - task: NodeTool@0
+            displayName: Use Node 18.x
+            inputs:
+              versionSpec: 18.x
+          - task: Npm@1
+            displayName: 'angular-cli-install'
+            inputs:
+              workingDir: '$(Build.Repository.LocalPath)/Src'
+          - task: Npm@1
+            displayName: 'ng-build'
+            inputs:
+              command: custom
+              workingDir: '$(Build.Repository.LocalPath)/Src'
+              customCommand: run ng build --prod
+          - task: SonarQubeAnalyze@5
+            displayName: 'Run Code Analysis'
+            condition: or(succeeded(), eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/collaboration'))
+            inputs:
+              jdkversion: 'JAVA_HOME'
+          - task: SonarQubePublish@5
+            condition: or(succeeded(), eq(variables['Build.Reason'], 'PullRequest'), eq(variables['Build.SourceBranch'], 'refs/heads/collaboration'))
+            displayName: 'Publish Quality Gate Result'
+          - task: PublishBuildArtifacts@1
+            displayName: Publish Artifacts
+            inputs:
+              ArtifactName: drop
+              PathtoPublish: Src\dist

@@ -1,0 +1,3 @@
+variables:
+  envList: dev,int
+
