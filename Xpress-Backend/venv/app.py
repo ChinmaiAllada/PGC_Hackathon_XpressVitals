@@ -5,6 +5,7 @@ from flask_cors import CORS
 import pandas as pd
 import requests
 import json
+import re
  
 # Replace with your Azure OpenAI resource information
 api_key = "C2dkqWsvNkoRRryZWoCeIMD22GTXlg9cOTaOhW4TK5BvyqPeJ9MMJQQJ99AJACYeBjFXJ3w3AAABACOGBZOS"  # Your Azure OpenAI API key
@@ -108,8 +109,8 @@ def get_duration(openai, level, patient_name):
         ("SERIOUS", "N"): "24 hours",
     }
 
-    duration = duration_map.get((openai, level), "Condition not found")
-    
+    duration = duration_map.get((openai, level), "2 weeks")
+   
     if duration != "Condition not found":
         # Get the appropriate message template based on the level
         message_template = message_templates.get(duration)
@@ -117,6 +118,7 @@ def get_duration(openai, level, patient_name):
             return message_template.format(patient_name=patient_name, duration=duration)
         else:
             return "Invalid level provided."
+        
     else:
         return duration
 
@@ -190,6 +192,12 @@ def sms_reply():
     
     # Check if we have a stored OpenAI query that requires user input
     if contact_number in response_storage:
+        response_storage[contact_number]['symptoms'] = incoming_msg
+        
+        
+            
+        
+        print(response_storage)
         if response_storage[contact_number].get('replied', False):
             # If the user has already received a response, don't reply again
             # msg.body("You have already sent a response. Thank you!")
@@ -214,7 +222,8 @@ def sms_reply():
                     {"role": "system", "content": long_string},
                     {"role": "user", "content": prompt}
                 ],
-                "temperature": 0.7,
+                # "temperature": 0.7,
+                "temperature": 0.4,
                 "max_tokens": 20,
             }
             
@@ -230,24 +239,67 @@ def sms_reply():
                     level = "A"
                 else:
                     level = "N"
+                    
+                response_storage[contact_number]['final_level'] = level
                 
                 # Respond with OpenAI's combined advice
                 template = get_duration(openai_content, level, patient_name)
                 msg.body(template)
                 
+                time_frames = ["1 week", "24 hours", "2 weeks", "1 month"]
+                found_time_frame = None
+
+                # Search for each time frame in the template
+                for time_frame in time_frames:
+                    if re.search(r'\b' + re.escape(time_frame) + r'\b', template):
+                        found_time_frame = time_frame
+                        break  #
+                    
+                if found_time_frame != None:
+                    response_storage[contact_number]['duration'] = found_time_frame
                 # Mark that we have replied to the user
                 response_storage[contact_number]['replied'] = True
             else:
-                msg.body("Error: Unable to fetch further advice.")
+                msg.body("Error: Unable to fetch further advice because the response status was not 200-OK.")
         else:
             # Default response if no stored message is found
             msg.body("I am sorry, I did not understand that. Please send the test results.")
     else:
         # If the contact number is not found in response_storage
         msg.body("I am sorry, I did not understand that. Please send the test results.")
+        
     print(str(resp))
     return str(resp)
+
+
+@app.route('/api/symptoms', methods=['GET'])
+def get_symptoms():
+    contact = request.args.get('contact')
+    formatted_contact = '+' + contact.lstrip('0') 
+    # Check if the contact is in response_storage
+    if formatted_contact in response_storage:
+        # Retrieve symptoms for the given contact
+        symptoms = response_storage[formatted_contact].get('symptoms', 'N/A')
+        duration = response_storage[formatted_contact].get('duration', 'N/A')
+        final_level = response_storage[formatted_contact].get('final_level', 'N/A')
+        return jsonify({'contact': formatted_contact, 'symptoms': symptoms, 'duration': duration,'final_level':final_level}), 200
+    else:
+        # Return an empty response if no symptoms are found
+        return jsonify({'contact': formatted_contact, 'symptoms': 'No symptoms recorded', 'duration': 'Not yet finalized','final_level': 'Not yet finalized'}), 404
+
+# @app.route('/sms-responses/<contact_number>', methods=['GET'])
+# def get_symptoms(contact_number):
+#     # Prepend '+' to the contact number
+#     formatted_contact_number = f"+{contact_number.lstrip('+')}"
     
+#     # Check if the formatted_contact_number exists in response_storage
+#     if formatted_contact_number in response_storage:
+#         # Get the user response (symptoms)
+#         user_response = response_storage[formatted_contact_number].get('user_response', 'No symptoms reported yet.')
+#         return jsonify({'symptoms': user_response}), 200
+#     else:
+#         return jsonify({'symptoms': 'No symptoms reported yet.'}), 404
+
 
 # # ======================================================================================================================
 
@@ -360,19 +412,22 @@ RANGES = {
     }
 }
 
-def classify_patients(patients):
-    classifications = []
+# @app.route('/patients_level', methods=['POST'])
+# def classify_patients():
+#     request_data = request.get_json()
+#     patients = request_data.get("patients")
+#     classifications = []
     
-    for patient in patients:
-        status = patient['Classifications']
-        if any(value == "Critical High" or value == "Critical Low" for value in status.values()):
-            classifications.append({"PatientID": patient["PatientID"], "Classification": "Critical"})
-        elif all(value == "Normal" for value in status.values()):
-            classifications.append({"PatientID": patient["PatientID"], "Classification": "Normal"})
-        else:
-            classifications.append({"PatientID": patient["PatientID"], "Classification": "Abnormal"})
+#     for patient in patients:
+#         status = patient['Classifications']
+#         if any(value == "Critical High" or value == "Critical Low" for value in status.values()):
+#             classifications.append({"PatientID": patient["ID"], "Classification": "Critical"})
+#         elif all(value == "Normal" for value in status.values()):
+#             classifications.append({"PatientID": patient["ID"], "Classification": "Normal"})
+#         else:
+#             classifications.append({"PatientID": patient["ID"], "Classification": "Abnormal"})
     
-    return classifications
+#     return classifications
 
 def classify_value(value, ranges):
     """Classify the value based on the given ranges."""
@@ -399,38 +454,38 @@ def get_patients():
 # @app.route('/classify', methods=['GET'])
 # def classify_patients_route():
     # Load Excel file
-    excel_path = "./patient_data_with_abnormals.xlsx"  # Use forward slashes for compatibility
-    df = pd.read_excel(excel_path)
+    # excel_path = "./patient_data_with_abnormals.xlsx"  # Use forward slashes for compatibility
+    # df = pd.read_excel(excel_path)
 
-    results = []
+    # results = []
 
-    for index, row in df.iterrows():
-        patient_result = {"ID": row["ID"],"Name":row["Name"],"Contact":row["Contact"], "Classifications": {}}
-        for param in RANGES.keys():
-            # Assuming the parameters are named as in the RANGES dictionary in the Excel file
-            if param in row:
-                print(param)
-                value = row[param]
-                if pd.notnull(value):  # Check if the value is not NaN
-                    # Special handling for Hemoglobin based on gender
-                    if param == "Hemoglobin (Male)" or param == "Hemoglobin (Female)":
-                        gender = row.get("Gender", "Male")  # Default to Male if Gender column missing
-                        param_name = f"Hemoglobin ({gender})"
-                        if param_name not in RANGES:  # Ensure param_name is in RANGES
-                            continue
-                    else:
-                        param_name = param
+    # for index, row in df.iterrows():
+    #     patient_result = {"ID": row["ID"],"Name":row["Name"],"Contact":row["Contact"], "Classifications": {}}
+    #     for param in RANGES.keys():
+    #         # Assuming the parameters are named as in the RANGES dictionary in the Excel file
+    #         if param in row:
+    #             print(param)
+    #             value = row[param]
+    #             if pd.notnull(value):  # Check if the value is not NaN
+    #                 # Special handling for Hemoglobin based on gender
+    #                 if param == "Hemoglobin (Male)" or param == "Hemoglobin (Female)":
+    #                     gender = row.get("Gender", "Male")  # Default to Male if Gender column missing
+    #                     param_name = f"Hemoglobin ({gender})"
+    #                     if param_name not in RANGES:  # Ensure param_name is in RANGES
+    #                         continue
+    #                 else:
+    #                     param_name = param
 
-                    classification = classify_value(value, RANGES[param_name])
-                    patient_result["Classifications"][param] = classification
-                    # patient_result["Classifications"][param] = classify_value(value, RANGES[param_name])
-                    # Debug statement to check if Hemoglobin classification is reached
-                    if param_name.startswith("Hemoglobin"):
-                        print(f"Classifying Hemoglobin for {patient_result['Name']} as {classification}")
+    #                 classification = classify_value(value, RANGES[param_name])
+    #                 patient_result["Classifications"][param] = classification
+    #                 # patient_result["Classifications"][param] = classify_value(value, RANGES[param_name])
+    #                 # Debug statement to check if Hemoglobin classification is reached
+    #                 if param_name.startswith("Hemoglobin"):
+    #                     print(f"Classifying Hemoglobin for {patient_result['Name']} as {classification}")
 
-        results.append(patient_result)
+    #     results.append(patient_result)
 
-    return jsonify((results))
+    # return jsonify((results))
 
 
 @app.route('/classify', methods=['GET'])
@@ -473,7 +528,20 @@ def classify_patients_route():
                     classification = classify_value(value, RANGES[param])
                     patient_result["Classifications"][param] = classification
 
+        # results.append(patient_result)
+        
+         # Determine final classification based on the classifications
+        status = patient_result["Classifications"]
+        if any(value in ["Critical High", "Critical Low"] for value in status.values()):
+            final_classification = "Critical"
+        elif all(value == "Normal" for value in status.values()):
+            final_classification = "Normal"
+        else:
+            final_classification = "Abnormal"
+
+        patient_result["FinalClassification"] = final_classification
         results.append(patient_result)
+
 
     return jsonify(results)
 
