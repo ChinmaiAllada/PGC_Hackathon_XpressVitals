@@ -1,70 +1,4 @@
 
-// .card-table {
-//   display: flex;
-//   flex-direction: column;
-//   gap: 16px;
-//   padding: 16px;
-// }
-
-// /* Header Row Styling */
-// .card-header-row {
-//   display: flex;
-//   background-color: #e0e0e0;
-//   padding: 12px;
-//   border-radius: 8px;
-//   font-weight: bold;
-// }
-
-// .card-header {
-//   flex: 1;
-//   padding: 0 10px;
-//   text-align: center;
-// }
-
-// /* Data Row Styling */
-// .card-row {
-//   display: flex;
-//   align-items: center;
-//   justify-content: space-between;
-//   background-color: #f9f9f9;
-//   padding: 12px;
-//   border: 1px solid #ccc;
-//   border-radius: 8px;
-// }
-
-// .card-detail {
-//   flex: 1;
-//   padding: 0 10px;
-//   text-align: center;
-// }
-
-// .card-indicator {
-//   width: 20px;
-//   height: 20px;
-//   border-radius: 50%;
-//   margin-left: 10px;
-//   display: inline-block;
-// }
-
-// /* Button Styling */
-// .sms-button {
-//   position: fixed;
-//   bottom: 20px;
-//   right: 20px;
-//   background-color: #00338E;
-//   color: white;
-//   padding: 12px 24px;
-//   border: none;
-//   border-radius: 5px;
-//   cursor: pointer;
-//   font-size: 16px;
-// }
-
-// .sms-button:hover {
-//   background-color: #0645b3;
-// }
-
-
 .card-table {
   display: flex;
   flex-direction: column;
@@ -111,6 +45,7 @@
   height: 20px;
   border-radius: 50%;
   margin-left: 10px;
+  margin-right: 10px;
   display: inline-block;
 }
 
@@ -154,3 +89,91 @@ button:hover {
 .print-button:hover {
   background-color: #029b02; /* Darker green on hover */
 }
+// //=====================================================================================
+
+// // .card-table {
+// //   width: 100%;
+// //   border-collapse: collapse;
+// //   margin: 20px 0;
+// // }
+
+// // .card-header-row {
+// //   display: flex;
+// //   background-color: #f2f2f2; /* Header background color */
+// //   font-weight: bold;
+// // }
+
+// // .card-header {
+// //   flex: 1;
+// //   padding: 10px;
+// //   text-align: left;
+// //   border: 1px solid #ddd; /* Border for each header */
+// // }
+
+// // .drop-list {
+// //   max-height: 400px; /* Set max height for scrolling */
+// //   overflow-y: auto; /* Enable scrolling */
+// // }
+
+// // .card-row {
+// //   display: flex;
+// //   align-items: center; /* Center vertically */
+// //   border: 1px solid #ddd; /* Border for each row */
+// //   padding: 10px;
+// // }
+
+// // .card-indicator {
+// //   width: 10px; /* Fixed width for indicator */
+// //   height: 40px; /* Fixed height for indicator */
+// //   margin-right: 10px; /* Space between indicator and text */
+// // }
+
+// // .card-detail {
+// //   flex: 1;
+// //   padding: 10px;
+// //   border-left: 1px solid #ddd; /* Left border for details */
+// // }
+
+// // .card-detail:first-child {
+// //   border-left: none; /* Remove left border for the first detail */
+// // }
+
+// // .button-container {
+// //   display: flex;
+// //   justify-content: space-between; /* Space buttons evenly */
+// //   margin-top: 20px;
+// // }
+
+// // .button-container button {
+// //   padding: 10px 20px;
+// //   border: none;
+// //   background-color: #007bff; /* Primary button color */
+// //   color: white;
+// //   cursor: pointer;
+// //   border-radius: 5px; /* Rounded corners */
+// // }
+
+// // .button-container button.print-button {
+// //   background-color: #28a745; /* Green color for print button */
+// // }
+
+// // .button-container button:hover {
+// //   opacity: 0.8; /* Hover effect */
+// // }
+
+// // @media (max-width: 768px) {
+// //   .card-header-row,
+// //   .card-row {
+// //     flex-direction: column; /* Stack items on smaller screens */
+// //   }
+
+// //   .card-header,
+// //   .card-detail {
+// //     text-align: center; /* Center text on smaller screens */
+// //   }
+
+// //   .card-indicator {
+// //     margin-bottom: 10px; /* Space below indicator on small screens */
+// //   }
+// // }
+// //=========================================================================================

@@ -1,57 +1,37 @@
-<!-- 
-
-   <div class="card-table">
-    <div class="card-header-row">
-      <div class="card-header">ID</div>
-      <div class="card-header">Name</div>
-      <div class="card-header">Contact</div>
-      <div class="card-header">Age</div>
-      <div class="card-header">Gender</div>
-      <div class="card-header">Critical Score</div>
-    </div>
-  
-    <div class="card-row" *ngFor="let person of people">
-      <div class="card-detail">{{ person.id }}</div>
-      <div class="card-detail">{{ person.name }}</div>
-      <div class="card-detail">{{ person.contact }}</div>
-      <div class="card-detail">{{ person.age }}</div>
-      <div class="card-detail">{{ person.gender }}</div>
-      <div class="card-detail">{{ person.criticalScore }}</div>
-      <div class="card-indicator" [ngStyle]="{ 'background-color': getIndicatorColor(person.criticalScore) }"></div>
-    </div>
-  </div>
-  
-  <button class="sms-button" (click)="sendSmsToPatients()">
-    Send SMS to Patients
-  </button>
-   -->
-
 <div class="card-table">
   <!-- Table Header -->
   <div class="card-header-row">
-    <div class="card-header">ID</div>
-    <div class="card-header">Name</div>
-    <div class="card-header">Contact</div>
-    <div class="card-header">Age</div>
-    <div class="card-header">Gender</div>
-    <div class="card-header">Critical Score</div>
+    <div class="card-indicator"  style="min-width: 20px;"></div>
+    <div class="card-indicator"  style="min-width: 20px;">ID</div>
+    <div class="card-detail" style="min-width: 116px;">Name</div>
+    <div class="card-detail" style="min-width: 116px;">Contact</div>
+    <div class="card-detail" style="min-width: 116px;">Age</div>
+    <div class="card-detail" style="min-width: 116px;">Gender</div>
+    <div class="card-detail" style="min-width: 116px;">Level from Reports</div>
+    <div class="card-detail" style="min-width: 116px;">Symptoms</div>
+    <div class="card-detail" style="min-width: 116px;">Call Duration</div>
   </div>
+  
 
   <!-- Table Rows (Reordering Enabled During Edit Mode) -->
   <div cdkDropList [cdkDropListDisabled]="!isEditMode" (cdkDropListDropped)="drop($event)" class="drop-list">
     <div class="card-row" *ngFor="let person of people; let i = index" cdkDrag>
-      <div class="card-detail">{{ person.ID }}</div>
-      <div class="card-detail">{{ person.Name }}</div>
-      <div class="card-detail">{{ person.Contact }}</div>
-      <div class="card-detail">{{ person.Age }}</div>
-      <div class="card-detail">{{ person.Gender }}</div>
-      <div class="card-indicator" [ngStyle]="{ 'background-color': getIndicatorColor() }"></div>
+      <div class="card-indicator"  style="min-width: 20px;" [ngStyle]="{ 'background-color': getIndicatorColor(person.duration) }"></div>
+      <div class="card-indicator"  style="min-width: 20px;">{{ person.ID }}</div>
+      <div class="card-detail" style="min-width: 116px;">{{ person.Name }}</div>
+      <div class="card-detail" style="min-width: 116px;">{{ person.Contact }}</div>
+      <div class="card-detail" style="min-width: 116px;">{{ person.Age }}</div>
+      <div class="card-detail" style="min-width: 116px;">{{ person.Gender }}</div>
+      <div class="card-detail" style="min-width: 116px;">{{ patientClassifications.get(person.ID) || 'N/A' }}</div>
+      <div class="card-detail" style="min-width: 116px; max-height: 150px;">{{ person.symptoms || 'N/A' }}</div>
+      <div class="card-detail" style="min-width: 116px;">{{ person.duration || 'N/A' }}</div>
     </div>
   </div>
 </div>
 
 
 <div class="button-container">
+  <!-- <button (click)="addDynamicColumns()" [disabled]="buttonClicked">Add Columns</button> -->
   <button *ngIf="!isEditMode" (click)="toggleEditMode()">Edit</button>
   <button *ngIf="isEditMode" (click)="saveOrder()">Save</button>
   <button class="print-button" (click)="printTable()">Print</button>

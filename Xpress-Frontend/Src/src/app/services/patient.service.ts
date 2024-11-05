@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 
 export interface Patient {
+  duration: any;
+  symptoms: string;
+  Classification: any;
   ID: number;
   Name: string;
   Contact: string ;
@@ -27,6 +30,7 @@ export class PatientService {
   private apiUrl = 'http://127.0.0.1:5000/patients';
   private parameterUrl = 'http://127.0.0.1:5000/classify';
   private openAIUrl = 'http://127.0.0.1:5000/openAIWithParams';
+  
   constructor(private http: HttpClient) {}
 
   getPatients(): Observable<Patient[]> {
@@ -43,5 +47,10 @@ export class PatientService {
       contact: contact,
       name: name
     });
+  }
+  
+
+  getSymptoms(contact: string): Observable<any> {
+    return this.http.get<any>(`http://127.0.0.1:5000/api/symptoms?contact=${contact}`);
   }
 }
