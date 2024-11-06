@@ -24,6 +24,8 @@ export class CardTableComponent implements OnInit {
   patient_level: any[] = [];
   pollingInterval: any;
   patientClassifications: any;
+  toNumber: string = 'whatsapp:+918688387949';   // The recipient's WhatsApp number (static)
+  fromNumber: string = 'whatsapp:+14155238886'; // Your Twilio WhatsApp number (static)
 
   constructor(
     private patientService: PatientService,
@@ -93,6 +95,19 @@ export class CardTableComponent implements OnInit {
     }
   }
   
+  triggerFlow(): void {
+    // Call the API to trigger the flow
+    this.patientService.triggerFlow(this.toNumber, this.fromNumber).subscribe(
+      (response) => {
+        // Log the successful response to the console
+        console.log('Flow triggered successfully:', response);
+      },
+      (error) => {
+        // Log the error response to the console
+        console.error('Error triggering flow:', error);
+      }
+    );
+  }
 
   // Drag and drop function to handle row reordering
   drop(event: CdkDragDrop<Patient[]>): void {

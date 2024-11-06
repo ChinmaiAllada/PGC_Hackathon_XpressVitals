@@ -40,6 +40,7 @@ headers = {
 
 account_sid = 'AC1614886bad304db756acc9987a8b8a9e'
 auth_token = 'd1a4113e47ee281075e32b98df570e16'
+flow_sid = 'FW5df5c867642d024bb68228cbbc7a8e67'
 client = Client(account_sid, auth_token)
 app = Flask(__name__)
 CORS(app) 
@@ -69,6 +70,58 @@ with open("system-prompt.txt", "r") as file:
 @app.route('/')
 def home():
     return send_from_directory('.', 'index.html')
+
+
+# @app.route('/trigger-flow', methods=['POST'])
+# def trigger_flow():
+#     # Get data from the incoming POST request
+#     to_number = data.get('to', 'whatsapp:+918688387949')  # Default to static number if not provided
+#     from_number = data.get('from', 'whatsapp:+14155238886')  # Your Twilio WhatsApp number
+    
+#     # Trigger the Studio Flow
+#     try:
+#         execution = client.studio.v1.flows(flow_sid).executions.create(
+#             to=to_number,
+#             from_=from_number
+#         )
+#         return jsonify({
+#             'status': 'success',
+#             'message': f'Flow execution created with SID: {execution.sid}'
+#         }), 200
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
+@app.route('/trigger-flow', methods=['POST'])
+def trigger_flow():
+    """
+    Endpoint to trigger a Twilio Studio Flow Execution via POST request.
+    Expects JSON payload with 'to' and 'from' numbers.
+    """
+    try:
+        # Get the JSON data from the request body
+        data = request.get_json()
+
+        if not data:
+            return jsonify({"error": "Invalid JSON payload"}), 400
+
+        # Get 'to' and 'from' phone numbers from the POST body (JSON payload)
+        to_number = data.get('to', 'whatsapp:+918688387949')  # Default to static number if not provided
+        from_number = data.get('from', 'whatsapp:+14155238886')  # Your Twilio WhatsApp number
+
+        # Trigger the Studio Flow execution
+        execution = client.studio.v1.flows(flow_sid).executions.create(
+            to=to_number,
+            from_=from_number
+        )
+
+        # Return the Execution SID as a response
+        return jsonify({
+            'status': 'success',
+            'message': f'Flow execution created with SID: {execution.sid}'
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 
 def get_duration(openai, level, patient_name):
