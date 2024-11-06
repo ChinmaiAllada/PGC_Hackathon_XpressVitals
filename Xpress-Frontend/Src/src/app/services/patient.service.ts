@@ -30,7 +30,8 @@ export class PatientService {
   private apiUrl = 'http://127.0.0.1:5000/patients';
   private parameterUrl = 'http://127.0.0.1:5000/classify';
   private openAIUrl = 'http://127.0.0.1:5000/openAIWithParams';
-  
+  private flowApiUrl = 'http://127.0.0.1:5000/trigger-flow';  // URL of your Flask API
+
   constructor(private http: HttpClient) {}
 
   getPatients(): Observable<Patient[]> {
@@ -49,7 +50,13 @@ export class PatientService {
     });
   }
   
-
+  triggerFlow(to: string, from: string): Observable<any> {
+    const body = {
+      to: to,
+      from: from
+    };
+    return this.http.post<any>(this.flowApiUrl, body);
+  }
   getSymptoms(contact: string): Observable<any> {
     return this.http.get<any>(`http://127.0.0.1:5000/api/symptoms?contact=${contact}`);
   }

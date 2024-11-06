@@ -32,8 +32,9 @@
 
 <div class="button-container">
   <!-- <button (click)="addDynamicColumns()" [disabled]="buttonClicked">Add Columns</button> -->
+  <button (click)="triggerFlow()">Trigger Flow</button>
   <button *ngIf="!isEditMode" (click)="toggleEditMode()">Edit</button>
   <button *ngIf="isEditMode" (click)="saveOrder()">Save</button>
   <button class="print-button" (click)="printTable()">Print</button>
-  <button (click)="sendSms()">Send SMS</button>
+  <button (click)="sendSms()">Get Symptoms</button>
 </div>
