@@ -7,11 +7,11 @@ from Excel using
 Defined constant ranges in the code for each parameter
  ![image](https://github.com/user-attachments/assets/6a778181-046b-4066-ba19-4b0a95d64216)
 
-	Used above rule based engine function to classify criticality of each parameter
-	 ![image](https://github.com/user-attachments/assets/cb4477c8-d402-43e0-bb6a-979343915c81)
+Used above rule based engine function to classify criticality of each parameter
+![image](https://github.com/user-attachments/assets/cb4477c8-d402-43e0-bb6a-979343915c81)
 
-	Based on classification of each parameter, final classification is done.
-•	Patient details and level from report is setup in UI.
+• 	Based on classification of each parameter, final classification is done.
+• 	Patient details and level from report is setup in UI.
 
 **OpenAI Setup:**
 •	Created a Resource grp – rg_xpress  and Azure OpenAI resource xpressvitals 
