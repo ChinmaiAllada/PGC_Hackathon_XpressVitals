@@ -249,7 +249,7 @@ export class CardTableComponent implements OnInit {
 
 
   sendMessage(to: string, message: string) {
-    this.http.post('https://9da6-203-200-15-250.ngrok-free.app/send', { to, body: message })
+    this.http.post('https://9f7f-203-200-15-250.ngrok-free.app/send', { to, body: message })
       .pipe(
         catchError(error => {
           this.responseMessage = `Network error: ${error.message}`;
