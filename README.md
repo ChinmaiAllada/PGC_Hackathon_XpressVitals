@@ -1,4 +1,4 @@
-**UI Setup:**
+ **UI Setup:**
 •	Fetched patient data on ngOnInit
 from Excel using 
 @app.route('/patients', methods=['GET']) 
